@@ -1,0 +1,172 @@
+WILLIAM TRUEX
+LAB 2 EMBEDDED SYSTEMS SECTION 3
+
+QUESTION 1 -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#include <msp430.h> 
+
+float b = 3.4;                  //global variable (floating point)
+
+int main(void)
+{
+	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
+	
+	unsigned char c = 0x3B;     //local variable (unsigned hex)
+	unsigned char d = 0x4A;
+
+	unsigned char e, f;         //declare 2 more variables to store after logic operations
+
+	int a = 6;                  //local variable (integer)
+
+	a += 1;                     //increment local variable
+	b -= 1.5;                   //decrement global variable
+
+	e = c && d;                 //AND operation
+	f = c || d;                 //OR operation
+
+	while(1);
+}
+
+QUESTION 2 -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#include <msp430.h> 
+
+int sum(int s1, int s2); //sum function declaration
+
+int main(void){
+	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
+	
+	signed int a = 0b1011001101100101;      //declare binary arithmetic values
+	signed int b = 0b1010110111000010;
+
+	signed int c;
+
+	c = sum(a,b);
+
+	while(1);
+}
+
+//sum function definition
+int sum(int s1, int s2){
+
+    signed int answer;
+    answer = s1 + s2;
+
+    return(answer);
+}
+
+QUESTION 3 -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+;MAIN LOOP ---------------------------------------------------------------------
+
+;Store the values in R4, R5, R6, R9
+			mov.b #00AB1h, R4;
+			mov.b #003C1h, R5;
+			mov.b #0001h, R6;
+			mov.w #0AB0h, R9;
+;And operations
+			and R6, R4;
+			and R6, R5;
+;Compare R4 & R6 and move on if yes, jump out if no
+			cmp R4, R6;
+			jeq NEXTCOMPARISON;
+			jne ExclusiveOr;
+;Compare R5 & R6
+NEXTCOMPARISON:
+			cmp R5, R6;
+			jeq SETR9;
+			jne ExclusiveOr;
+;If both conditions fulfilled, set R9 to 0FF0h.
+SETR9:
+			mov.w #0FF0h, R9;
+			jmp $;
+;Compare R4 and R5 to see if only 1 has LSB = 1
+ExclusiveOr:
+			xor R4, R5;
+			cmp R5, R6;
+			jeq OneComplement;
+			jmp $;
+;If only R4 or R5 has LSB 1, set R10 to one's complement of R9.
+OneComplement:
+			mov.w R9, R10;
+			inv R10;
+
+QUESTION 4 -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+			mov.w   #0006h,&2000h;
+            mov.w   #0009h,&2002h;
+            clr.w   &2006h;
+            clr.w   &2008h;
+            mov.w   &2002h,&2004h;
+            add.w   &2000h,&2004h;
+            cmp.w   #000Ah,&2004h;
+            jhs Greater
+            jlo Less
+Greater:
+            mov.w   &2000h,&2008h;
+            jmp $;
+Less:
+            mov.w   &2002h,&2006h;
+            jmp $;
+            
+QUESTION 5 -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+;MAIN LOOP 
+			mov.w #002Bh, R4; store values in R4 and R5
+			mov.w #0000h, R5;
+			cmp R4, R5; compare R4 and R5
+			jge Greater;
+			jl Less;
+			jmp $;
+Greater:
+			call #greater_func;
+			jmp $;
+
+Less:
+			jeq equal;
+			call #less_func;
+			jmp $;
+
+greater_func:
+			mov.b #0001h, &2000h;
+			mov.b #0002h, &2002h;
+			mov.b #0003h, &2004h;
+			mov.b #0004h, &2006h;
+			mov.b #0005h, &2008h;
+			sub #0001h, R4;
+			ret;
+
+less_func:
+			mov.b #000Ah, &2000h;
+			mov.b #0009h, &2002h;
+			mov.b #0008h, &2004h;
+			mov.b #0007h, &2006h;
+			mov.b #0006h, &2008h;
+			sub #0001h, R4;
+			ret;
+
+equal:
+			jmp $;
+      
+QUESTION 6 -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+;MAIN LOOP
+			mov.w #2D97h, R4; Store the given values in R4 and R5
+			mov.w #6239h, R5;
+			mov.w R4, R6; create extra register so that R4 doesn't get modified
+			jmp and_operation;
+			jmp $;
+
+and_operation:
+			call #and_subroutine;
+			jmp $;
+
+and_subroutine:
+			and R5, R6; perform AND operation and store in R6
+			jmp or_operation;
+			ret;
+
+or_operation:
+			bis R5, R6; perform OR operation b/w result of AND operation and second number (third number??)
+			mov.w R6, &203Ch; write final result to memory 203C.
+			jmp $;
