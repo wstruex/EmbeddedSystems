@@ -1,0 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% function [xf,w]=fourierseries(x,t0,n)
+% symbolic Fourier series computation
+% Inputs:
+%   x - time domain signal
+%   t0 - period of the signal
+%   n - number of terms in Fourier series
+% Outputs
+%  xf - Fourier series coefficients
+%  w - harmonic frequencies
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [xf,w] = fourierseries(x,t0,n) % opens new function fourierseries with input t0, x, n and output w, xf
+
+syms t  % creates scalar variable t
+for k=1:n   %creates for loop that increments from 1 to n
+    x1(k) = int(x*exp(-j*2*pi*(k-1)*t/t0),t,-t0/2,t0/2)/t0; % creates array of Fourier coefficients
+    xf(k) = subs(x1(k)); % creates array of coefficients using symbolic substitution function.
+    w(k) = (k-1)*2*pi/t0; % creates array of frequencies using 2*pi*k/T equation.
+end
+
+end
